@@ -61,6 +61,50 @@ app.post('/employee', (req, res, next) => {
         });
 });
 
+app.get('/dept/:dept_id/employees', (req, res) => {
+    const {dept_id} = req.params;
+    db.all(`
+SELECT
+    d.id as id,
+    d.name as name,
+    e.name as employee_name,
+    e.id as employee_id
+FROM  dept as d 
+INNER JOIN employee_dept as ed on d.id = ed.dept_id
+INNER JOIN employee as e on e.id = ed.user_id
+WHERE d.id = ${dept_id}
+    `).then((data) => {
+        res.header('Content-Type', 'application/json');
+        res.send({
+            employees: data,
+            numResults: data.length
+        });
+    })
+    
+});
+
+app.get('/employee/:employee_id/depts', (req, res) => {
+    const {employee_id} = req.params;
+    db.all(`
+SELECT
+    d.id as id,
+    d.name as name,
+    e.name as employee_name,
+    e.id as employee_id
+FROM  dept as d 
+INNER JOIN employee_dept as ed on d.id = ed.dept_id
+INNER JOIN employee as e on e.id = ed.user_id
+WHERE e.id = ${employee_id}
+    `).then((data) => {
+        res.header('Content-Type', 'application/json');
+        res.send({
+            employees: data,
+            numResults: data.length
+        });
+    })
+    
+});
+
 Promise.resolve()
     .then(() => db.open(DB_NAME, { Promise }))
     .then(() => db.migrate({ force: 'last' }))
